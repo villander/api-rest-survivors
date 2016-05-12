@@ -5,9 +5,9 @@ const itemsTheSurvivor = { water: 4, food: 3, medication: 2, ammunition: 1 };
 const checkItemsList = (survivorList, requestList) => {
   if (survivorList.length >= requestList.length) {
     const arrayAux = survivorList.slice();
-    for (let i = 0; i < requestList.length; i++) {
-      for (let j = 0; j < survivorList.length; j++) {
-        if (survivorList[j].points === requestList[i].points) {
+    for (let i = 0; i < survivorList.length; i++) {
+      for (let j = 0; j < requestList.length; j++) {
+        if (requestList[j].points === survivorList[i].points) {
           arrayAux.splice(arrayAux.indexOf(j), 1);
           break;
         }
@@ -93,12 +93,14 @@ const getAverageResourceBySurvivor = (req, res, resource) => {
 const controller = {
 
   getAllSurvivors: (req, res) => {
-    Survivor.find({}, (err, survivors) => {
-      if (err) {
-        res.status(500).json({ error: err });
-      }
-      res.json(survivors);
-    });
+    Survivor.find(
+      {},
+      (err, survivors) => {
+        if (err) {
+          res.status(500).json({ error: err });
+        }
+        res.json(survivors);
+      }).sort({ name: 'asc' });
   },
 
   getSurvivorById: (req, res) => {
@@ -138,8 +140,8 @@ const controller = {
   marketsItemsBetweenSurvivors: (req, res) => {
     let scoreOfItensSurvivorOne = 0;
     let scoreOfItensSurvivorTwo = 0;
-    const itemsOfSurvivorOne = req.body[0].items;
-    const itemsOfSurvivorTwo = req.body[1].items;
+    const itemsOfSurvivorOne = req.body[0].items.length;
+    const itemsOfSurvivorTwo = req.body[1].items.length;
     if (!itemsOfSurvivorOne || !itemsOfSurvivorTwo) {
       res.json({ message: 'Not have items for trade, try again' });
     }
@@ -171,25 +173,29 @@ const controller = {
         }
         let itemSurvivorFoundOne = null;
         let itemSurvivorFoundTwo = null;
+        let requestListOne = null;
+        let requestListTwo = null;
 
         // see who on result is a survivor requested
         if (survivors[0]._id === req.body[0].id) {
           itemSurvivorFoundOne = survivors[0].inventory;
           itemSurvivorFoundTwo = survivors[1].inventory;
+          requestListOne = req.body[0].items;
+          requestListTwo = req.body[1].items;
         } else {
           itemSurvivorFoundOne = survivors[1].inventory;
           itemSurvivorFoundTwo = survivors[0].inventory;
+          requestListOne = req.body[1].items;
+          requestListTwo = req.body[0].items;
         }
 
 
-        if (checkItemsList(itemSurvivorFoundOne, req.body[0].items) &&
-          checkItemsList(itemSurvivorFoundTwo, req.body[1].items)) {
+        if (checkItemsList(itemSurvivorFoundOne, requestListOne) &&
+          checkItemsList(itemSurvivorFoundTwo, requestListTwo)) {
           // res.json({ message: 'you can do trade' });
           const itemsTradingTheSurvivorOne = findItemsId(itemSurvivorFoundOne, req.body[0].items);
           const itemsTradingTheSurvivorTwo = findItemsId(itemSurvivorFoundTwo, req.body[1].items);
 
-          console.log(itemsTradingTheSurvivorOne);
-          console.log(itemsTradingTheSurvivorTwo);
           Survivor.findOneAndUpdate(
             { _id: req.body[0].id },
             { $pull: { 'inventory': { $elemMatch: { _id: itemsTradingTheSurvivorOne } } } },

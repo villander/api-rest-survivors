@@ -25,10 +25,7 @@ app.use(methodOverride());
 const api = {};
 api.survivors = routerSurvivors;
 
-// API
-app.get('/api', (req, res) => {
-  res.json({ api: 'survivors', version: 1.0 });
-});
+
 app.use('/api/survivors', api.survivors);
 
 
