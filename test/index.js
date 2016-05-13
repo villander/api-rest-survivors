@@ -57,28 +57,34 @@ const mockSurvivors = [
 describe('Survivors', () => {
   beforeEach((done) => {
     Survivor.create(
-      mockSurvivors,
+      mockSurvivors[0],
       (err) => {
         if (err) {
           console.error(err);
         }
-        done();
+        Survivor.create(
+          mockSurvivors[1],
+          (err) => {
+            if (err) {
+              console.error(err);
+            }
+            done();
+          }
+        );
       }
     );
   });
 
   afterEach((done) => {
-    for (let i in mongoose.connection.collections) {
-      mongoose.connection.collections[i].remove();
-    }
-    return done();
+    mongoose.connection.db.dropDatabase(() => {
+      done();
+    });
   });
 
   it('should list ALL survivors on /api/survivors GET', (done) => {
     chai.request(server)
       .get('/api/survivors')
       .end((err, res) => {
-        console.log(res.body[0]);
         res.should.have.status(200);
         res.should.be.json;
         res.body.should.be.a('array');
@@ -169,6 +175,9 @@ describe('Survivors', () => {
       // get survivor created in beforeEach
       .get('/api/survivors')
       .end((err, res) => {
+        if (err) {
+          console.error(err);
+        }
         res.should.have.status(200);
         chai.request(server)
           .put(`/api/survivors/${res.body[0]._id}`)
@@ -222,8 +231,8 @@ describe('Survivors', () => {
           .send(arrayOfSurvivors)
           .end((error, response) => {
             response.should.have.status(200);
-            console.log(response.body);
             response.body.should.be.a('object');
+            response.body.survivorOne._id.should.equal(arrayOfSurvivors[0].id);
             expect(response.body.survivorOne).to.have.deep.property(
               'inventory[0].name',
               res.body[1].inventory[0].name
@@ -232,6 +241,15 @@ describe('Survivors', () => {
               'inventory[0].points',
               res.body[1].inventory[0].points
             );
+            expect(response.body.survivorOne).to.have.deep.property(
+              'inventory[1].name',
+              res.body[1].inventory[1].name
+            );
+            expect(response.body.survivorOne).to.have.deep.property(
+              'inventory[1].points',
+              res.body[1].inventory[1].points
+            );
+            response.body.survivorTwo._id.should.equal(arrayOfSurvivors[1].id);
             expect(response.body.survivorTwo).to.have.deep.property(
               'inventory[0].name',
               res.body[0].inventory[0].name
@@ -240,6 +258,97 @@ describe('Survivors', () => {
               'inventory[0].points',
               res.body[0].inventory[0].points
             );
+            done();
+          });
+      });
+  });
+
+  it('Get Percentage of infected/non-infected survivors /api/survivors/reports/survivors?infected={boolean} GET',
+    (done) => {
+      Survivor.create(
+        {
+          name: 'Selma',
+          age: '67',
+          gender: 'female',
+          lastLocation: [
+            9,
+            -45
+          ],
+          isInfected: true,
+          inventory: [{
+            name: 'Water',
+            points: 4
+          }]
+        },
+        (err, newSurvivor) => {
+          if (err) {
+            console.error(err);
+          }
+          chai.request(server)
+            .get(`/api/survivors/reports/survivors?infected=${true}`)
+            .end((error, res) => {
+              res.should.have.status(200);
+              res.should.be.json;
+              res.body.should.be.a('object');
+              res.body.result[0].percentage.toFixed(2).should.equal('33.33');
+              chai.request(server)
+                .get(`/api/survivors/reports/survivors?infected=${false}`)
+                .end((error, response) => {
+                  response.should.have.status(200);
+                  response.should.be.json;
+                  response.body.should.be.a('object');
+                  response.body.result[0].percentage.toFixed(2).should.equal('66.67');
+                  done();
+                });
+            });
+        });
+    });
+
+  it('Get Percentage of each kind of resource by survivor /api/survivors/reports/survivors?resource={string} GET', (done) => {
+    chai.request(server)
+      // get survivors created in beforeEach
+      .get(`/api/survivors/reports/survivors?resource=${'Food'}`)
+      .end((error, response) => {
+        response.should.have.status(200);
+        response.body.should.be.a('object');
+        response.body.result[0].average.should.equal(0.5);
+        done();
+      });
+  });
+
+  it('Get Points lost because of infected survivor /api/survivors/reports/survivors/pointslost', (done) => {
+    Survivor.create(
+      {
+        name: 'Dyego',
+        age: '67',
+        gender: 'male',
+        lastLocation: [
+          13,
+          -44
+        ],
+        isInfected: true,
+        inventory: [
+          {
+            name: 'Water',
+            points: 4
+          },
+          {
+            name: 'Water',
+            points: 4
+          }
+        ]
+      },
+      (err, newSurvivor) => {
+        if (err) {
+          console.error(err);
+        }
+        chai.request(server)
+          // get survivors created in beforeEach
+          .get('/api/survivors/reports/survivors/pointslost')
+          .end((error, response) => {
+            response.should.have.status(200);
+            response.body.should.be.a('object');
+            response.body.result[0].pointsLost.should.equal(8);
             done();
           });
       });
