@@ -43,12 +43,12 @@ const getPercentageOfSanity = (req, res, infectedBoolean) => {
       Survivor.aggregate(
         { $match: { isInfected: infectedBoolean } },
         { $group: { _id: '$isInfected', count: { $sum: 1 } } },
-        { $project: { percentage: { $multiply: ['$count', 100 / allSurvivors] } } },
-        (error, percentage) => {
+        { $project: { _id: 0, percentage: { $multiply: ['$count', 100 / allSurvivors] } } },
+        (error, result) => {
           if (error) {
             res.send(error);
           }
-          res.send({ percentage });
+          res.send({ result });
         }
       );
     }
@@ -62,7 +62,6 @@ const getAverageResourceBySurvivor = (req, res, resource) => {
       if (err) {
         res.send(err);
       }
-      console.log(resource);
       Survivor.aggregate(
         // Unwind the array
         { $unwind: '$inventory' },
@@ -81,9 +80,7 @@ const getAverageResourceBySurvivor = (req, res, resource) => {
           if (error) {
             res.send(error);
           }
-          res.send({
-            message: `The average of ${req.query.resource} per survivor is ${result[0].average}`
-          });
+          res.send({ result });
         }
       );
     }
@@ -312,7 +309,11 @@ const controller = {
         if (error) {
           res.send(error);
         }
-        res.send({ result });
+        if (result.length) {
+          res.send({ result });
+        } else {
+          res.send({ result: 0 });
+        }
       }
     );
   }
