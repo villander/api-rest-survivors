@@ -203,8 +203,8 @@ describe('Survivors', () => {
             .put(`/api/survivors/${res.body[0]._id}/report/${res.body[1]._id}`)
             .end((error, response) => {
               response.should.have.status(200);
-              response.body.survivor.should.be.a('object');
-              expect(response.body.survivor).to.have.deep.property(
+              response.body.should.be.a('object');
+              expect(response.body).to.have.deep.property(
                 'indications[0].author',
                 res.body[0]._id
               );
@@ -232,29 +232,29 @@ describe('Survivors', () => {
           .end((error, response) => {
             response.should.have.status(200);
             response.body.should.be.a('object');
-            response.body.survivorOne._id.should.equal(arrayOfSurvivors[0].id);
-            expect(response.body.survivorOne).to.have.deep.property(
+            response.body.survivorOneUpdated._id.should.equal(arrayOfSurvivors[0].id);
+            expect(response.body.survivorOneUpdated).to.have.deep.property(
               'inventory[0].name',
               res.body[1].inventory[0].name
             );
-            expect(response.body.survivorOne).to.have.deep.property(
+            expect(response.body.survivorOneUpdated).to.have.deep.property(
               'inventory[0].points',
               res.body[1].inventory[0].points
             );
-            expect(response.body.survivorOne).to.have.deep.property(
+            expect(response.body.survivorOneUpdated).to.have.deep.property(
               'inventory[1].name',
               res.body[1].inventory[1].name
             );
-            expect(response.body.survivorOne).to.have.deep.property(
+            expect(response.body.survivorOneUpdated).to.have.deep.property(
               'inventory[1].points',
               res.body[1].inventory[1].points
             );
-            response.body.survivorTwo._id.should.equal(arrayOfSurvivors[1].id);
-            expect(response.body.survivorTwo).to.have.deep.property(
+            response.body.survivorTwoUpdated._id.should.equal(arrayOfSurvivors[1].id);
+            expect(response.body.survivorTwoUpdated).to.have.deep.property(
               'inventory[0].name',
               res.body[0].inventory[0].name
             );
-            expect(response.body.survivorTwo).to.have.deep.property(
+            expect(response.body.survivorTwoUpdated).to.have.deep.property(
               'inventory[0].points',
               res.body[0].inventory[0].points
             );

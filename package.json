@@ -6,11 +6,12 @@
   "scripts": {
     "build-dev": "NODE_ENV=production rm -rf dist/ && babel -d dist/ src/ && nodemon dist/index.js",
     "dev": "NODE_ENV=development nodemon index.js",
-    "test": "NODE_ENV=test mocha --timeout 30000 --compilers js:babel-register"
+    "test": "NODE_ENV=test mocha --timeout 300000 --compilers js:babel-register"
   },
   "author": "Michael Villander",
   "license": "ISC",
   "dependencies": {
+    "bluebird": "^3.4.0",
     "body-parser": "^1.15.0",
     "cors": "^2.7.1",
     "del": "^2.2.0",
