@@ -1,5 +1,8 @@
-import mongoose from 'mongoose';
+import mongooseAsModule from 'mongoose';
+import Promise from 'bluebird';
 import survivorSchema from './schema';
+
+const mongoose = Promise.promisifyAll(mongooseAsModule);
 
 const Survivor = mongoose.model('Survivor', survivorSchema);
 const checkItemsList = (survivorList, requestList) => {
@@ -33,118 +36,121 @@ const findItemsId = (survivorList, requestList) => {
 };
 const survivorMethods = {
   getAll(callback) {
-    Survivor.find({}, (err, survivors) => {
-      if (err) {
-        callback(err);
-      }
-      callback(null, survivors);
-    }).sort({ name: 'asc' });
+    Survivor.find({}).sort({ name: 'asc' })
+      .then((survivors) => {
+        return callback(null, survivors);
+      })
+      .catch((err) => {
+        return callback(err);
+      });
   },
   create(newSurvivor, callback) {
-    Survivor.create(newSurvivor, (err, survivor) => {
-      if (err) {
-        callback(err);
-      }
-      callback(null, survivor);
-    });
+    Survivor.create(newSurvivor)
+      .then((survivor) => {
+        return callback(null, survivor);
+      })
+      .catch((err) => {
+        return callback(err);
+      });
   },
   getById(id, callback) {
-    Survivor.findOne({ _id: id }, (err, survivor) => {
-      if (err) {
-        callback(err);
-      }
-      callback(null, survivor);
-    });
+    Survivor.findOne({ _id: id })
+      .then((survivor) => {
+        return callback(null, survivor);
+      })
+      .catch((err) => {
+        return callback(err);
+      });
   },
   updateLocation(id, newLocation, callback) {
     const query = { _id: id };
     Survivor.findOneAndUpdate(query,
       { $set: { lastLocation: newLocation } },
-      { new: true },
-      (err, survivor) => {
-        if (err) {
-          callback(err);
-        }
-        callback(null, survivor);
+      { new: true })
+      .then((survivor) => {
+        return callback(null, survivor);
+      })
+      .catch((err) => {
+        return callback(err);
       });
   },
   markAsInfected(id, infectedId, callback) {
     const query = { _id: infectedId };
-    Survivor.findById(query, (err, survivor) => {
-      if (err) {
-        callback(err);
-      }
-      let hasIndicated = -1;
-      if (survivor.indications.length) {
-        hasIndicated = survivor.indications.map((indication) => {
-          return indication.author;
-        }).indexOf(id);
-      }
-      if (hasIndicated === -1) {
-        survivor.indications.push({ author: id });
-        survivor.save((error, survivorInfected) => {
-          if (error) {
-            callback(error);
-          }
-          callback(null, survivorInfected);
-        });
-      } else {
-        callback(null, { message: 'you already indicated this survivor as infected try another' });
-      }
-    });
+    Survivor.findById(query)
+      .then((survivor) => {
+        let hasIndicated = -1;
+        if (survivor.indications.length) {
+          hasIndicated = survivor.indications.map((indication) => {
+            return indication.author;
+          }).indexOf(id);
+        }
+        if (hasIndicated === -1) {
+          survivor.indications.push({ author: id });
+          return survivor.save();
+        } else {
+          return callback(null, { message: 'you already indicated this survivor as infected try another' });
+        }
+      })
+      .then((survivorInfected) => {
+        return callback(null, survivorInfected);
+      })
+      .catch((err) => {
+        return callback(err);
+      });
   },
   getPointsLost(callback) {
     Survivor.aggregate(
       { $unwind: '$inventory' },
       { $match: { isInfected: true } },
       { $group: { _id: null, count: { $sum: '$inventory.points' } } },
-      { $project: { _id: 0, pointsLost: '$count' } },
-      (error, result) => {
-        if (error) {
-          callback(error);
-        }
-        callback(null, result);
+      { $project: { _id: 0, pointsLost: '$count' } }).execAsync()
+      .then((result) => {
+        return callback(null, result);
+      })
+      .catch((err) => {
+        return callback(err);
       });
   },
   getPercentageOfSanity(infectedBoolean, callback) {
-    Survivor.count({}, (err, allSurvivors) => {
-      if (err) {
-        callback(err);
-      }
-      Survivor.aggregate(
-        { $match: { isInfected: infectedBoolean } },
-        { $group: { _id: '$isInfected', count: { $sum: 1 } } },
-        { $project: { _id: 0, percentage: { $multiply: ['$count', 100 / allSurvivors] } } },
-        (error, result) => {
-          if (error) {
-            callback(error);
-          }
-          callback(null, { result });
-        });
-    });
+    Survivor.count({})
+      .then((allSurvivors) => {
+        return Survivor.aggregate(
+          { $match: { isInfected: infectedBoolean } },
+          { $group: { _id: '$isInfected', count: { $sum: 1 } } },
+          {
+            $project: {
+              _id: 0,
+              percentage: { $multiply: ['$count', 100 / allSurvivors] }
+            }
+          }).execAsync();
+      })
+      .then((result) => {
+        return callback(null, { result });
+      })
+      .catch((error) => {
+        return callback(error);
+      });
   },
   getAverageResourceBySurvivor(resource, callback) {
-    Survivor.count({}, (err, allSurvivors) => {
-      if (err) {
-        callback(err);
-      }
-      Survivor.aggregate({ $unwind: '$inventory' },
-        {
-          $group: {
-            _id: null,
-            count: {
-              $sum: { $cond: [{ $eq: ['$inventory.points', resource] }, 1, 0] }
+    Survivor.count({})
+      .then((allSurvivors) => {
+        return Survivor.aggregate({ $unwind: '$inventory' },
+          {
+            $group: {
+              _id: null,
+              count: {
+                $sum: { $cond: [{ $eq: ['$inventory.points', resource] }, 1, 0] }
+              }
             }
-          }
-        },
-        { $project: { _id: 0, average: { $divide: ['$count', allSurvivors] } } },
-        (error, result) => {
-          if (error) {
-            callback(error);
-          }
-          callback(null, { result });
-        });
-    });
+          },
+          { $project: { _id: 0, average: { $divide: ['$count', allSurvivors] } } }).execAsync();
+      })
+      .then((result) => {
+        return callback(null, { result });
+      })
+      .catch((error) => {
+        return callback(error);
+      });
   },
   tradeItemsBetweenTwoSurvivors(survivorOne, survivorTwo, callback) {
     Survivor.find({
