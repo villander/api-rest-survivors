@@ -87,12 +87,13 @@ const controller = {
   },
   getReportSurvivors(req, res) {
     if (req.query.hasOwnProperty('infected')) {
-      Survivor.getPercentageOfSanity(req.query.infected, (err, result) => {
-        if (err) {
-          res.status(500).json({ error: err });
-        }
-        res.json(result);
-      });
+      Survivor.getPercentageOfSanity(req.query.infected,
+        (err, result) => {
+          if (err) {
+            res.status(500).json({ error: err });
+          }
+          res.json(result);
+        });
     } else if (req.query.hasOwnProperty('resource')) {
       let resource = null;
       switch (req.query.resource.toLowerCase()) {
@@ -113,12 +114,13 @@ const controller = {
             message: 'params invalid consult the documentation, you have put water, food and etc'
           });
       }
-      Survivor.getAverageResourceBySurvivor(resource, (err, result) => {
-        if (err) {
-          res.status(500).json({ error: err });
-        }
-        res.json(result);
-      });
+      Survivor.getAverageResourceBySurvivor(resource,
+        (err, result) => {
+          if (err) {
+            res.status(500).json({ error: err });
+          }
+          res.json(result);
+        });
     }
   }
 };

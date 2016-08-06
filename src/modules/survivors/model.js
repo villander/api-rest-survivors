@@ -205,6 +205,7 @@ const survivorMethods = {
             { new: true });
           return Promise.all([moveItemSurvivorOne, moveItemSurvivorTwo]);
         }
+        return callback(null, { message: 'Items not found' });
       })
       .then(() => {
         const putItemSurvivorOne = Survivor.findOneAndUpdate({ _id: survivorOne.id },
