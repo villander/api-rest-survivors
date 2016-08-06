@@ -160,87 +160,70 @@ const survivorMethods = {
           survivorTwo.id,
         ]
       }
-    }, (err, survivors) => {
-      const hasSomeSurvivorInfected = [];
-      if (survivors[0].isInfected) {
-        hasSomeSurvivorInfected.push(survivors[0].name);
-      } else if (survivors[1].isInfected) {
-        hasSomeSurvivorInfected.push(survivors[1].name);
-      }
-      if (hasSomeSurvivorInfected.length > 0) {
-        callback({
-          message: `These survivors are infected, ${hasSomeSurvivorInfected} try other again`
-        });
-      }
-      let itemSurvivorFoundOne = null;
-      let itemSurvivorFoundTwo = null;
-      let requestListOne = null;
-      let requestListTwo = null;
+    })
+      .then((survivors) => {
+        const hasSomeSurvivorInfected = [];
+        if (survivors[0].isInfected) {
+          hasSomeSurvivorInfected.push(survivors[0].name);
+        } else if (survivors[1].isInfected) {
+          hasSomeSurvivorInfected.push(survivors[1].name);
+        }
+        if (hasSomeSurvivorInfected.length > 0) {
+          return callback(null, hasSomeSurvivorInfected);
+        }
+        let itemSurvivorFoundOne = null;
+        let itemSurvivorFoundTwo = null;
+        let requestListOne = null;
+        let requestListTwo = null;
 
-      // see who on result is a survivor requested
-      if (survivors[0]._id === survivorOne.id) {
-        itemSurvivorFoundOne = survivors[0].inventory;
-        itemSurvivorFoundTwo = survivors[1].inventory;
-        requestListOne = survivorOne.items;
-        requestListTwo = survivorTwo.items;
-      } else {
-        itemSurvivorFoundOne = survivors[1].inventory;
-        itemSurvivorFoundTwo = survivors[0].inventory;
-        requestListOne = survivorTwo.items;
-        requestListTwo = survivorOne.items;
-      }
+        // see who on result is a survivor requested
+        if (survivors[0]._id === survivorOne.id) {
+          itemSurvivorFoundOne = survivors[0].inventory;
+          itemSurvivorFoundTwo = survivors[1].inventory;
+          requestListOne = survivorOne.items;
+          requestListTwo = survivorTwo.items;
+        } else {
+          itemSurvivorFoundOne = survivors[1].inventory;
+          itemSurvivorFoundTwo = survivors[0].inventory;
+          requestListOne = survivorTwo.items;
+          requestListTwo = survivorOne.items;
+        }
 
 
-      if (checkItemsList(itemSurvivorFoundOne, requestListOne) &&
-        checkItemsList(itemSurvivorFoundTwo, requestListTwo)) {
-        // callback({ message: 'you can do trade' });
-        const itemsTradingTheSurvivorOne = findItemsId(itemSurvivorFoundOne, survivorOne.items);
-        const itemsTradingTheSurvivorTwo = findItemsId(itemSurvivorFoundTwo, survivorTwo.items);
+        if (checkItemsList(itemSurvivorFoundOne, requestListOne) &&
+          checkItemsList(itemSurvivorFoundTwo, requestListTwo)) {
+          // callback({ message: 'you can do trade' });
+          const itemsTradingTheSurvivorOne = findItemsId(itemSurvivorFoundOne, survivorOne.items);
+          const itemsTradingTheSurvivorTwo = findItemsId(itemSurvivorFoundTwo, survivorTwo.items);
 
-        Survivor.findOneAndUpdate(
-          { _id: survivorOne.id },
-          { $pull: { 'inventory': { $elemMatch: { _id: itemsTradingTheSurvivorOne } } } },
-          { new: true },
-          (error) => {
-            if (error) {
-              callback(error);
-            }
-            Survivor.findOneAndUpdate(
-              { _id: survivorTwo.id },
-              { $pull: { 'inventory': { $elemMatch: { _id: itemsTradingTheSurvivorTwo } } } },
-              { new: true },
-              (error) => {
-                if (error) {
-                  callback(error);
-                }
-                Survivor.findOneAndUpdate(
-                  { _id: survivorOne.id },
-                  { $push: { 'inventory': { $each: survivorTwo.items } } },
-                  { new: true },
-                  (error, survivorOneUpdated) => {
-                    if (error) {
-                      callback(error);
-                    }
-                    Survivor.findOneAndUpdate(
-                      { _id: survivorTwo.id },
-                      { $push: { 'inventory': { $each: survivorOne.items } } },
-                      { new: true },
-                      (error, survivorTwoUpdated) => {
-                        if (error) {
-                          callback(error);
-                        }
-                        callback(null, { survivorOneUpdated, survivorTwoUpdated });
-                      });
-                  });
-              });
-          });
-      } else {
-        callback(null, { message: 'Items not found' });
-      }
-    });
+          const moveItemSurvivorOne = Survivor.findOneAndUpdate({ _id: survivorOne.id },
+            { $pull: { 'inventory': { $elemMatch: { _id: itemsTradingTheSurvivorOne } } } },
+            { new: true });
+
+          const moveItemSurvivorTwo = Survivor.findOneAndUpdate({ _id: survivorTwo.id },
+            { $pull: { 'inventory': { $elemMatch: { _id: itemsTradingTheSurvivorTwo } } } },
+            { new: true });
+          return Promise.all([moveItemSurvivorOne, moveItemSurvivorTwo]);
+        }
+      })
+      .then(() => {
+        const putItemSurvivorOne = Survivor.findOneAndUpdate({ _id: survivorOne.id },
+          { $push: { 'inventory': { $each: survivorTwo.items } } },
+          { new: true });
+        const putItemSurvivorTwo = Survivor.findOneAndUpdate({ _id: survivorTwo.id },
+          { $push: { 'inventory': { $each: survivorOne.items } } },
+          { new: true });
+        return Promise.all([putItemSurvivorOne, putItemSurvivorTwo]);
+      })
+      .then((survivorsUpdated) => {
+        const survivorOneUpdated = survivorsUpdated[0];
+        const survivorTwoUpdated = survivorsUpdated[1];
+        return callback(null, { survivorOneUpdated, survivorTwoUpdated });
+      })
+      .catch((error) => {
+        return callback(error);
+      });
   }
 };
 
 export default survivorMethods;
-
-
