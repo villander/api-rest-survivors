@@ -7,7 +7,7 @@ config.mongoURI = {
   test: 'mongodb://mano:123@ds021182.mlab.com:21182/zssn'
 };
 
-//console.log(process.env);
+// console.log(process.env);
 // Build the connection string
 const dbURI = config.mongoURI[process.env.NODE_ENV];
 

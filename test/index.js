@@ -5,6 +5,7 @@ const should = chai.should();
 const expect = chai.expect;
 import server from '../src/index';
 import Survivor from '../src/modules/survivors/model';
+import mockSurvivors from './FIXTURES/survivors';
 
 chai.use(chaiHttp);
 
@@ -12,65 +13,15 @@ chai.use(chaiHttp);
 // this is helpful when you would like to change behavior when testing
 // process.env.NODE_ENV = 'test';
 
-const mockSurvivors = [
-  {
-    name: 'Survivor Brown',
-    age: '34',
-    gender: 'male',
-    lastLocation: [
-      17,
-      77
-    ],
-    isInfected: false,
-    indications: [],
-    inventory: [
-      {
-        name: 'Food',
-        points: 3
-      }
-    ]
-  },
-  {
-    name: 'Survivor Rock',
-    age: '34',
-    gender: 'male',
-    lastLocation: [
-      67,
-      -7
-    ],
-    isInfected: false,
-    indications: [],
-    inventory: [
-      {
-        name: 'Medication',
-        points: 2
-      },
-      {
-        name: 'Ammunition',
-        points: 1
-      }
-    ]
-  }
-];
-
-
 describe('Survivors', () => {
   beforeEach((done) => {
     Survivor.create(
-      mockSurvivors[0],
+      mockSurvivors,
       (err) => {
         if (err) {
           console.error(err);
         }
-        Survivor.create(
-          mockSurvivors[1],
-          (err) => {
-            if (err) {
-              console.error(err);
-            }
-            done();
-          }
-        );
+        done();
       }
     );
   });
