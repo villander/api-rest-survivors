@@ -182,11 +182,11 @@ const survivorMethods = {
           const itemsTradingTheSurvivorTwo = findItemsId(itemSurvivorFoundTwo, survivorTwo.items);
 
           const moveItemSurvivorOne = Survivor.findOneAndUpdate({ _id: survivorOne.id },
-            { $pull: { 'inventory': { $elemMatch: { _id: itemsTradingTheSurvivorOne } } } },
+            { $pull: { inventory: { $elemMatch: { _id: itemsTradingTheSurvivorOne } } } },
             { new: true });
 
           const moveItemSurvivorTwo = Survivor.findOneAndUpdate({ _id: survivorTwo.id },
-            { $pull: { 'inventory': { $elemMatch: { _id: itemsTradingTheSurvivorTwo } } } },
+            { $pull: { inventory: { $elemMatch: { _id: itemsTradingTheSurvivorTwo } } } },
             { new: true });
           return Promise.all([moveItemSurvivorOne, moveItemSurvivorTwo]);
         }
@@ -194,10 +194,10 @@ const survivorMethods = {
       })
       .then(() => {
         const putItemSurvivorOne = Survivor.findOneAndUpdate({ _id: survivorOne.id },
-          { $push: { 'inventory': { $each: survivorTwo.items } } },
+          { $push: { inventory: { $each: survivorTwo.items } } },
           { new: true });
         const putItemSurvivorTwo = Survivor.findOneAndUpdate({ _id: survivorTwo.id },
-          { $push: { 'inventory': { $each: survivorOne.items } } },
+          { $push: { inventory: { $each: survivorOne.items } } },
           { new: true });
         return Promise.all([putItemSurvivorOne, putItemSurvivorTwo]);
       })
