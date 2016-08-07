@@ -1,27 +1,11 @@
 import mongooseAsModule from 'mongoose';
 import Promise from 'bluebird';
 import survivorSchema from './schema';
+import { ifHasSameItens } from '../../helpers/ifHasSameItens';
 
 const mongoose = Promise.promisifyAll(mongooseAsModule);
-
 const Survivor = mongoose.model('Survivor', survivorSchema);
-const checkItemsList = (survivorList, requestList) => {
-  if (survivorList.length >= requestList.length) {
-    const arrayAux = survivorList.slice();
-    for (let i = 0; i < survivorList.length; i++) {
-      for (let j = 0; j < requestList.length; j++) {
-        if (requestList[j].points === survivorList[i].points) {
-          arrayAux.splice(arrayAux.indexOf(j), 1);
-          break;
-        }
-      }
-    }
-    if (arrayAux.length === (survivorList.length - requestList.length)) {
-      return true;
-    }
-  }
-  return false;
-};
+
 const findItemsId = (survivorList, requestList) => {
   const arrayOfItemsId = [];
   for (let i = 0; i < survivorList.length; i++) {
@@ -34,6 +18,7 @@ const findItemsId = (survivorList, requestList) => {
   }
   return arrayOfItemsId;
 };
+
 const survivorMethods = {
   getAll(callback) {
     Survivor.find({}).sort({ name: 'asc' })
@@ -54,7 +39,8 @@ const survivorMethods = {
       });
   },
   getById(id, callback) {
-    Survivor.findOne({ _id: id })
+    const query = { _id: id };
+    Survivor.findOne(query)
       .then((survivor) => {
         return callback(null, survivor);
       })
@@ -189,9 +175,8 @@ const survivorMethods = {
           requestListTwo = survivorOne.items;
         }
 
-
-        if (checkItemsList(itemSurvivorFoundOne, requestListOne) &&
-          checkItemsList(itemSurvivorFoundTwo, requestListTwo)) {
+        if (ifHasSameItens(itemSurvivorFoundOne, requestListOne) &&
+          ifHasSameItens(itemSurvivorFoundTwo, requestListTwo)) {
           // callback({ message: 'you can do trade' });
           const itemsTradingTheSurvivorOne = findItemsId(itemSurvivorFoundOne, survivorOne.items);
           const itemsTradingTheSurvivorTwo = findItemsId(itemSurvivorFoundTwo, survivorTwo.items);
