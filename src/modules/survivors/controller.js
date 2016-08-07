@@ -1,4 +1,5 @@
 import Survivor from './model';
+import { ifHasSamePoints } from '../../helpers/ifHasSamePoints';
 
 const itemsTheSurvivor = { water: 4, food: 3, medication: 2, ammunition: 1 };
 
@@ -61,20 +62,12 @@ const controller = {
     });
   },
   tradeItemsBetweenSurvivors(req, res) {
-    let scoreOfItensSurvivorOne = 0;
-    let scoreOfItensSurvivorTwo = 0;
     const itemsOfSurvivorOne = req.body[0].items.length;
     const itemsOfSurvivorTwo = req.body[1].items.length;
     if (!itemsOfSurvivorOne || !itemsOfSurvivorTwo) {
       res.json({ message: 'Not have items for trade, try again' });
     }
-    for (let i = 0, length = itemsOfSurvivorOne.length; i < length; i++) {
-      scoreOfItensSurvivorOne += itemsOfSurvivorOne[i].points;
-    }
-    for (let i = 0, length = itemsOfSurvivorTwo.length; i < length; i++) {
-      scoreOfItensSurvivorTwo += itemsOfSurvivorTwo[i].points;
-    }
-    if (scoreOfItensSurvivorOne === scoreOfItensSurvivorTwo) {
+    if (ifHasSamePoints(itemsOfSurvivorOne, itemsOfSurvivorTwo)) {
       Survivor.tradeItemsBetweenTwoSurvivors(req.body[0], req.body[1],
         (err, result) => {
           if (err) {
