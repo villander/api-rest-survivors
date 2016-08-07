@@ -5,7 +5,7 @@ const should = chai.should();
 const expect = chai.expect;
 import server from '../src/index';
 import Survivor from '../src/modules/survivors/model';
-import * as survivorsDummy from './FIXTURES/survivors';
+import * as dummyData from './support/fixtures/dummy-data';
 
 chai.use(chaiHttp);
 
@@ -16,7 +16,7 @@ chai.use(chaiHttp);
 describe('Survivors', () => {
   beforeEach((done) => {
     Survivor.create(
-      survivorsDummy.mockSurvivors,
+      dummyData.mockSurvivors,
       (err) => {
         if (err) {
           console.error(err);
@@ -51,7 +51,7 @@ describe('Survivors', () => {
 
 
   it('should list a SINGLE survivor on /api/survivor/<id> GET', (done) => {
-    Survivor.create(survivorsDummy.firstSurvivor,
+    Survivor.create(dummyData.firstSurvivor,
       (err, newSurvivor) => {
         if (err) {
           console.error(err);
@@ -77,7 +77,7 @@ describe('Survivors', () => {
   it('should add a SINGLE survivor on /api/survivors POST', (done) => {
     chai.request(server)
       .post('/api/survivors/')
-      .send(survivorsDummy.secondSurvivor)
+      .send(dummyData.secondSurvivor)
       .end((err, res) => {
         res.should.have.status(201);
         res.should.be.json;
@@ -187,7 +187,7 @@ describe('Survivors', () => {
 
   it('Get Percentage of infected/non-infected survivors /api/survivors/reports/survivors?infected={boolean} GET',
     (done) => {
-      Survivor.create(survivorsDummy.thirdSurvivor,
+      Survivor.create(dummyData.thirdSurvivor,
         (err) => {
           if (err) {
             console.error(err);
@@ -225,7 +225,7 @@ describe('Survivors', () => {
   });
 
   it('Get Points lost because of infected survivor /api/survivors/reports/survivors/pointslost', (done) => {
-    Survivor.create(survivorsDummy.fourthSurvivor,
+    Survivor.create(dummyData.fourthSurvivor,
       (err) => {
         if (err) {
           console.error(err);
