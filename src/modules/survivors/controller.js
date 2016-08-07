@@ -60,7 +60,7 @@ const controller = {
       }
     });
   },
-  marketsItemsBetweenSurvivors(req, res) {
+  tradeItemsBetweenSurvivors(req, res) {
     let scoreOfItensSurvivorOne = 0;
     let scoreOfItensSurvivorTwo = 0;
     const itemsOfSurvivorOne = req.body[0].items.length;
