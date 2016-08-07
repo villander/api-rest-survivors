@@ -2,22 +2,10 @@ import mongooseAsModule from 'mongoose';
 import Promise from 'bluebird';
 import survivorSchema from './schema';
 import { ifHasSameItens } from '../../helpers/ifHasSameItens';
+import { extracItensOfSurvivor } from '../../helpers/extracItensOfSurvivor';
 
 const mongoose = Promise.promisifyAll(mongooseAsModule);
 const Survivor = mongoose.model('Survivor', survivorSchema);
-
-const findItemsId = (survivorList, requestList) => {
-  const arrayOfItemsId = [];
-  for (let i = 0; i < survivorList.length; i++) {
-    for (let j = 0; j < requestList.length; j++) {
-      if (survivorList[i].points === requestList[j].points) {
-        arrayOfItemsId.push(survivorList[i]._id);
-        break;
-      }
-    }
-  }
-  return arrayOfItemsId;
-};
 
 const survivorMethods = {
   getAll(callback) {
@@ -178,15 +166,15 @@ const survivorMethods = {
         if (ifHasSameItens(itemSurvivorFoundOne, requestListOne) &&
           ifHasSameItens(itemSurvivorFoundTwo, requestListTwo)) {
           // callback({ message: 'you can do trade' });
-          const itemsTradingTheSurvivorOne = findItemsId(itemSurvivorFoundOne, survivorOne.items);
-          const itemsTradingTheSurvivorTwo = findItemsId(itemSurvivorFoundTwo, survivorTwo.items);
+          const itemsOfSurvivorOne = extracItensOfSurvivor(itemSurvivorFoundOne, survivorOne.items);
+          const itemsOfSurvivorTwo = extracItensOfSurvivor(itemSurvivorFoundTwo, survivorTwo.items);
 
           const moveItemSurvivorOne = Survivor.findOneAndUpdate({ _id: survivorOne.id },
-            { $pull: { inventory: { $elemMatch: { _id: itemsTradingTheSurvivorOne } } } },
+            { $pull: { inventory: { $elemMatch: { _id: itemsOfSurvivorOne } } } },
             { new: true });
 
           const moveItemSurvivorTwo = Survivor.findOneAndUpdate({ _id: survivorTwo.id },
-            { $pull: { inventory: { $elemMatch: { _id: itemsTradingTheSurvivorTwo } } } },
+            { $pull: { inventory: { $elemMatch: { _id: itemsOfSurvivorTwo } } } },
             { new: true });
           return Promise.all([moveItemSurvivorOne, moveItemSurvivorTwo]);
         }
