@@ -75,12 +75,13 @@ const controller = {
       scoreOfItensSurvivorTwo += itemsOfSurvivorTwo[i].points;
     }
     if (scoreOfItensSurvivorOne === scoreOfItensSurvivorTwo) {
-      Survivor.tradeItemsBetweenTwoSurvivors(req.body[0], req.body[1], (err, result) => {
-        if (err) {
-          res.status(500).json({ error: err });
-        }
-        res.json(result);
-      });
+      Survivor.tradeItemsBetweenTwoSurvivors(req.body[0], req.body[1],
+        (err, result) => {
+          if (err) {
+            res.status(500).json({ error: err });
+          }
+          res.json(result);
+        });
     } else {
       res.json({ message: 'your trading must have the same points, try again' });
     }

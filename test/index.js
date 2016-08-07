@@ -5,7 +5,7 @@ const should = chai.should();
 const expect = chai.expect;
 import server from '../src/index';
 import Survivor from '../src/modules/survivors/model';
-import mockSurvivors from './FIXTURES/survivors';
+import * as survivorsDummy from './FIXTURES/survivors';
 
 chai.use(chaiHttp);
 
@@ -16,7 +16,7 @@ chai.use(chaiHttp);
 describe('Survivors', () => {
   beforeEach((done) => {
     Survivor.create(
-      mockSurvivors,
+      survivorsDummy.mockSurvivors,
       (err) => {
         if (err) {
           console.error(err);
@@ -51,21 +51,7 @@ describe('Survivors', () => {
 
 
   it('should list a SINGLE survivor on /api/survivor/<id> GET', (done) => {
-    Survivor.create(
-      {
-        name: 'Dilmãe',
-        age: '67',
-        gender: 'female',
-        lastLocation: [
-          9,
-          -45
-        ],
-        isInfected: false,
-        inventory: [{
-          name: 'Water',
-          points: 4
-        }]
-      },
+    Survivor.create(survivorsDummy.firstSurvivor,
       (err, newSurvivor) => {
         if (err) {
           console.error(err);
@@ -89,24 +75,9 @@ describe('Survivors', () => {
   });
 
   it('should add a SINGLE survivor on /api/survivors POST', (done) => {
-    const newSurvivor = {
-      name: 'James Brown',
-      age: '54',
-      gender: 'male',
-      lastLocation: [
-        17,
-        6
-      ],
-      isInfected: false,
-      indications: [],
-      inventory: [{
-        name: 'Food',
-        points: 3
-      }]
-    };
     chai.request(server)
       .post('/api/survivors/')
-      .send(newSurvivor)
+      .send(survivorsDummy.secondSurvivor)
       .end((err, res) => {
         res.should.have.status(201);
         res.should.be.json;
@@ -123,7 +94,7 @@ describe('Survivors', () => {
 
   it('should update the location SINGLE survivor on /api/survivors/<id> PUT', (done) => {
     chai.request(server)
-      // get survivor created in beforeEach
+      // get survivors created in beforeEach
       .get('/api/survivors')
       .end((err, res) => {
         if (err) {
@@ -216,22 +187,8 @@ describe('Survivors', () => {
 
   it('Get Percentage of infected/non-infected survivors /api/survivors/reports/survivors?infected={boolean} GET',
     (done) => {
-      Survivor.create(
-        {
-          name: 'Selma',
-          age: '67',
-          gender: 'female',
-          lastLocation: [
-            9,
-            -45
-          ],
-          isInfected: true,
-          inventory: [{
-            name: 'Water',
-            points: 4
-          }]
-        },
-        (err, newSurvivor) => {
+      Survivor.create(survivorsDummy.thirdSurvivor,
+        (err) => {
           if (err) {
             console.error(err);
           }
@@ -268,28 +225,8 @@ describe('Survivors', () => {
   });
 
   it('Get Points lost because of infected survivor /api/survivors/reports/survivors/pointslost', (done) => {
-    Survivor.create(
-      {
-        name: 'Dyego',
-        age: '67',
-        gender: 'male',
-        lastLocation: [
-          13,
-          -44
-        ],
-        isInfected: true,
-        inventory: [
-          {
-            name: 'Water',
-            points: 4
-          },
-          {
-            name: 'Water',
-            points: 4
-          }
-        ]
-      },
-      (err, newSurvivor) => {
+    Survivor.create(survivorsDummy.fourthSurvivor,
+      (err) => {
         if (err) {
           console.error(err);
         }

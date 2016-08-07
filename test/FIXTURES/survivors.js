@@ -39,4 +39,78 @@ const mockSurvivors = [
   }
 ];
 
-export default mockSurvivors;
+const firstSurvivor = {
+  name: 'Dilmãe',
+  age: '67',
+  gender: 'female',
+  lastLocation: [
+    9,
+    -45
+  ],
+  isInfected: false,
+  inventory: [{
+    name: 'Water',
+    points: 4
+  }]
+};
+
+const secondSurvivor = {
+  name: 'James Brown',
+  age: '54',
+  gender: 'male',
+  lastLocation: [
+    17,
+    6
+  ],
+  isInfected: false,
+  indications: [],
+  inventory: [{
+    name: 'Food',
+    points: 3
+  }]
+};
+
+const thirdSurvivor = {
+  name: 'Selma',
+  age: '67',
+  gender: 'female',
+  lastLocation: [
+    9,
+    -45
+  ],
+  isInfected: true,
+  inventory: [{
+    name: 'Water',
+    points: 4
+  }]
+};
+
+const fourthSurvivor = {
+  name: 'Dyego',
+  age: '67',
+  gender: 'male',
+  lastLocation: [
+    13,
+    -44
+  ],
+  isInfected: true,
+  inventory: [
+    {
+      name: 'Water',
+      points: 4
+    },
+    {
+      name: 'Water',
+      points: 4
+    }
+  ]
+};
+
+
+export {
+mockSurvivors,
+firstSurvivor,
+secondSurvivor,
+thirdSurvivor,
+fourthSurvivor
+};
