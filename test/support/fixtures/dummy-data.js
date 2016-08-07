@@ -1,4 +1,4 @@
-const mockSurvivors = [
+export const mockSurvivors = [
   {
     name: 'Survivor Brown',
     age: '34',
@@ -39,7 +39,7 @@ const mockSurvivors = [
   }
 ];
 
-const firstSurvivor = {
+export const firstSurvivor = {
   name: 'Dilmãe',
   age: '67',
   gender: 'female',
@@ -54,7 +54,7 @@ const firstSurvivor = {
   }]
 };
 
-const secondSurvivor = {
+export const secondSurvivor = {
   name: 'James Brown',
   age: '54',
   gender: 'male',
@@ -70,7 +70,7 @@ const secondSurvivor = {
   }]
 };
 
-const thirdSurvivor = {
+export const thirdSurvivor = {
   name: 'Selma',
   age: '67',
   gender: 'female',
@@ -85,7 +85,7 @@ const thirdSurvivor = {
   }]
 };
 
-const fourthSurvivor = {
+export const fourthSurvivor = {
   name: 'Dyego',
   age: '67',
   gender: 'male',
@@ -104,13 +104,4 @@ const fourthSurvivor = {
       points: 4
     }
   ]
-};
-
-
-export {
-mockSurvivors,
-firstSurvivor,
-secondSurvivor,
-thirdSurvivor,
-fourthSurvivor
 };
